@@ -22,6 +22,7 @@
 #include <commons/kmsloop.h>
 #include <commons/kmsrefstruct.h>
 #include <math.h>
+#include <stdio.h>
 
 #define LATENCY 600             //ms
 
@@ -158,6 +159,12 @@ compare_port_data (gconstpointer a, gconstpointer b)
 static void 
 kms_composite_mixer_recalculate_sizes (gpointer data)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "Recalculating size.\n");
+  
+  fclose(pFile);
+  
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (data);
   GstCaps *filtercaps;
   gint width, height, top, left, counter;
@@ -345,6 +352,12 @@ cb_latency (GstPad * pad, GstPadProbeInfo * info, gpointer data)
 static void
 kms_composite_mixer_port_data_destroy (gpointer data)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_port_data_destroy.\n");
+  
+  fclose(pFile);
+  
   KmsCompositeMixerData *port_data = (KmsCompositeMixerData *) data;
   KmsCompositeMixer *self = port_data->mixer;
   GstPad *audiosink;
@@ -452,6 +465,12 @@ static GstPadProbeReturn
 link_to_videomixer (GstPad * pad, GstPadProbeInfo * info,
     KmsCompositeMixerData * data)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "link_to_videomixer.\n");
+  
+  fclose(pFile);
+  
   GstPadTemplate *sink_pad_template;
   KmsCompositeMixer *mixer;
 
@@ -548,6 +567,12 @@ create_gint (gint value)
 static void
 kms_composite_mixer_unhandle_port (KmsBaseHub * mixer, gint id)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_unhandle_port.\n");
+  
+  fclose(pFile);
+  
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (mixer);
 
   GST_DEBUG ("unhandle id %d", id);
@@ -565,6 +590,12 @@ kms_composite_mixer_unhandle_port (KmsBaseHub * mixer, gint id)
 static KmsCompositeMixerData *
 kms_composite_mixer_port_data_create (KmsCompositeMixer * mixer, gint id)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_port_data_create.\n");
+  
+  fclose(pFile);
+  
   KmsCompositeMixerData *data;
   gchar *padname;
   GstCaps *filtercaps;
@@ -663,6 +694,13 @@ static gint
 kms_composite_mixer_handle_port (KmsBaseHub * mixer,
     GstElement * mixer_end_point)
 {
+  
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_handle_port.\n");
+  
+  fclose(pFile);
+  
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (mixer);
   KmsCompositeMixerData *port_data;
   gint port_id;
@@ -795,6 +833,12 @@ kms_composite_mixer_finalize (GObject * object)
 static void
 kms_composite_mixer_class_init (KmsCompositeMixerClass * klass)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_class_init.\n");
+  
+  fclose(pFile);
+  
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
   KmsBaseHubClass *base_hub_class = KMS_BASE_HUB_CLASS (klass);
   GstElementClass *gstelement_class = GST_ELEMENT_CLASS (klass);
@@ -827,6 +871,12 @@ kms_composite_mixer_class_init (KmsCompositeMixerClass * klass)
 static void
 kms_composite_mixer_init (KmsCompositeMixer * self)
 {
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  
+  fprintf(pFile, "kms_composite_mixer_init.\n");
+  
+  fclose(pFile);
+  
   self->priv = KMS_COMPOSITE_MIXER_GET_PRIVATE (self);
 
   g_rec_mutex_init (&self->priv->mutex);
