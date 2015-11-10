@@ -213,7 +213,7 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
           "width", G_TYPE_INT, width, 
           "height", G_TYPE_INT, height,
           "framerate", GST_TYPE_FRACTION, 15, 1, 
-          "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1, NULL);
+          "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, ceil(width / height), NULL);
         
     g_object_set (port_data->capsfilter, "caps", filtercaps, NULL);
     gst_caps_unref (filtercaps);
