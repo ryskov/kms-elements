@@ -162,7 +162,7 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
   FILE* pFile = fopen("/usr/local/src/composite.log", "a");
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (data);
   GstCaps *filtercaps;
-  gint width, height, top, left, counter;
+  gint width, height, top, left, counter, aspectNumerator, aspectDenominator;
   GList *l;
   GList *values = g_hash_table_get_values (self->priv->ports);
   
@@ -196,9 +196,13 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
         height = self->priv->output_height; // get 100% of height
       }
       
-      width = self->priv->output_width; // get 100% of width             
+      width = self->priv->output_width; // get 100% of width
+      aspectNumerator = 5;
+      aspectDenominator = 3;
     }
     else {
+      aspectNumerator = 1;
+      aspectDenominator = 1;
       // everyone else - get rekt
       top = self->priv->output_height - (self->priv->output_height / 5); // top-offset at 80% into y-axis
       left = (self->priv->output_width / (self->priv->n_elems - 1)) * (counter - 1);  
@@ -206,14 +210,15 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
       height = self->priv->output_height - top;
       width = self->priv->output_width / (self->priv->n_elems - 1);
     }
+    
 
     filtercaps =
         gst_caps_new_simple ("video/x-raw", 
           "format", G_TYPE_STRING, "AYUV",
           "width", G_TYPE_INT, width, 
           "height", G_TYPE_INT, height,
-          "framerate", GST_TYPE_FRACTION, 15, 1, 
-          "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, ceil(width / height), NULL);
+          "framerate", GST_TYPE_FRACTION, 15, 1,
+          "pixel-aspect-ratio", GST_TYPE_FRACTION, aspectNumerator, aspectDenominator, NULL);
         
     g_object_set (port_data->capsfilter, "caps", filtercaps, NULL);
     gst_caps_unref (filtercaps);
@@ -229,8 +234,8 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
     GST_DEBUG_OBJECT (self, "top %d left %d width %d height %d", top, left,
         width, height);
         
-    fprintf(pFile, "counter %d id_port %d \n", counter, port_data->id);
-    fprintf(pFile, "top %d left %d width %d height %d", top, left, width, height);
+    fprintf(pFile, "counter %d id_port %d\n", counter, port_data->id);
+    fprintf(pFile, "top %d left %d width %d height %d\n", top, left, width, height);
   }
 
   g_list_free (values);
