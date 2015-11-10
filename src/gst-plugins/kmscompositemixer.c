@@ -22,6 +22,7 @@
 #include <commons/kmsloop.h>
 #include <commons/kmsrefstruct.h>
 #include <math.h>
+#include <stdio.h>
 
 #define LATENCY 600             //ms
 
