@@ -159,16 +159,14 @@ compare_port_data (gconstpointer a, gconstpointer b)
 static void
 kms_composite_mixer_recalculate_sizes (gpointer data)
 {
- FILE* pFile = fopen("/usr/local/src/composite.log", "a");
+  FILE* pFile = fopen("/usr/local/src/composite.log", "a");
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (data);
   GstCaps *filtercaps;
   gint width, height, top, left, counter;
   GList *l;
   GList *values = g_hash_table_get_values (self->priv->ports);
-
-  fprintf(pFile, "Recalculating size.\n");
   
-  fclose(pFile);
+  fprintf(pFile, "Recalculating size.\n");
 
   if (self->priv->n_elems <= 0) {
     return;
@@ -230,9 +228,16 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
     GST_DEBUG_OBJECT (self, "counter %d id_port %d ", counter, port_data->id);
     GST_DEBUG_OBJECT (self, "top %d left %d width %d height %d", top, left,
         width, height);
+        
+    fprintf(pFile, "counter %d id_port %d \n", counter, port_data->id);
+    fprintf(pFile, "top %d left %d width %d height %d", top, left, width, height);
   }
 
   g_list_free (values);
+  
+  if (pFile) {
+    fclose(pFile);
+  }
 }
 
 static gboolean
