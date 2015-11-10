@@ -158,11 +158,16 @@ compare_port_data (gconstpointer a, gconstpointer b)
 static void
 kms_composite_mixer_recalculate_sizes (gpointer data)
 {
+ FILE* pFile = fopen("/usr/local/src/composite.log", "a");
   KmsCompositeMixer *self = KMS_COMPOSITE_MIXER (data);
   GstCaps *filtercaps;
-  gint width, height, top, left, counter, n_columns, n_rows;
+  gint width, height, top, left, counter;
   GList *l;
   GList *values = g_hash_table_get_values (self->priv->ports);
+
+  fprintf(pFile, "Recalculating size.\n");
+  
+  fclose(pFile);
 
   if (self->priv->n_elems <= 0) {
     return;
@@ -171,34 +176,54 @@ kms_composite_mixer_recalculate_sizes (gpointer data)
   counter = 0;
   values = g_list_sort (values, compare_port_data);
 
-  n_columns = (gint) ceil (sqrt (self->priv->n_elems));
-  n_rows = (gint) ceil ((float) self->priv->n_elems / (float) n_columns);
-
-  GST_DEBUG_OBJECT (self, "columns %d rows %d", n_columns, n_rows);
-
-  width = self->priv->output_width / n_columns;
-  height = self->priv->output_height / n_rows;
-
   for (l = values; l != NULL; l = l->next) {
     KmsCompositeMixerData *port_data = l->data;
 
     if (port_data->input == FALSE) {
       continue;
     }
+    
+    if (counter == 0) {
+      // first hub - get big
+      top = 0;
+      left = 0;
+            
+      if (self->priv->n_elems > 1) {
+        // if there are others
+        height = self->priv->output_height - (self->priv->output_height / 5); // get 80% of height
+      }
+      else {
+        // if alone
+        height = self->priv->output_height; // get 100% of height
+      }
+      
+      width = self->priv->output_width; // get 100% of width             
+    }
+    else {
+      // everyone else - get rekt
+      top = self->priv->output_height - (self->priv->output_height / 5); // top-offset at 80% into y-axis
+      left = (self->priv->output_width / (self->priv->n_elems - 1)) * (counter - 1);  
+      
+      height = self->priv->output_height - top;
+      width = self->priv->output_width / (self->priv->n_elems - 1);
+    }
 
     filtercaps =
-        gst_caps_new_simple ("video/x-raw", "format", G_TYPE_STRING, "AYUV",
-        "width", G_TYPE_INT, width, "height", G_TYPE_INT, height,
-        "framerate", GST_TYPE_FRACTION, 15, 1, "pixel-aspect-ratio",
-        GST_TYPE_FRACTION, 1, 1, NULL);
+        gst_caps_new_simple ("video/x-raw", 
+          "format", G_TYPE_STRING, "AYUV",
+          "width", G_TYPE_INT, width, 
+          "height", G_TYPE_INT, height,
+          "framerate", GST_TYPE_FRACTION, 15, 1, 
+          "pixel-aspect-ratio", GST_TYPE_FRACTION, 1, 1, NULL);
+        
     g_object_set (port_data->capsfilter, "caps", filtercaps, NULL);
     gst_caps_unref (filtercaps);
-
-    top = ((counter / n_columns) * height);
-    left = ((counter % n_columns) * width);
-
-    g_object_set (port_data->video_mixer_pad, "xpos", left, "ypos", top,
-        "alpha", 1.0, NULL);
+    
+    g_object_set (port_data->video_mixer_pad, 
+      "xpos", left, 
+      "ypos", top,
+      "alpha", 1.0, NULL);
+      
     counter++;
 
     GST_DEBUG_OBJECT (self, "counter %d id_port %d ", counter, port_data->id);
